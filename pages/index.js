@@ -1,112 +1,56 @@
-import Image from 'next/image'
-import Container from '../components/Container'
+// pages/index.js
 import Link from 'next/link'
-import { getNotionData } from '../lib/getNotionData'
+import Container from '../components/Container'
+import { getAllPosts } from '../lib/notion'
+
+export async function getStaticProps() {
+  const posts = await getAllPosts()
+  return {
+    props: {
+      posts,
+    },
+    revalidate: 60,
+  }
+}
 
 export default function Home({ posts }) {
   return (
-    <Container>
-      <div className="mx-auto mb-16 max-w-2xl">
-        <div className="mx-auto mb-4 flex max-w-sm items-center justify-center">
-          <Image src="/notion.svg" height={60} width={60} alt="Notion logo" />
-          <span className="mx-4">+</span>
-          <Image src="/nextjs.svg" height={80} width={133} alt="Next.js logo" />
-          <span className="mx-4">+</span>
-          <Image src="/tailwindcss.svg" height={24} width={192} alt="Tailwind CSS logo" />
-        </div>
-        <div className="mb-16">
-          <h1 className="mx-auto mb-2 w-full max-w-xl text-3xl font-bold tracking-tight text-black md:text-center md:text-5xl">
-            Starter blog template powered by Next.js, Notion and Tailwind CSS
-          </h1>
-          <p className="mx-auto mb-5 max-w-xl text-gray-700 md:text-center">
-            This is an open-source starter blog template that is statically generated with{' '}
-            <a
-              href="https://nextjs.org/"
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Next.js
-            </a>
-            , content powered by{' '}
-            <a
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://developers.notion.com/"
-            >
-              Notion
-            </a>
-            , styled with{' '}
-            <a
-              href="http://tailwindcss.com/"
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Tailwind CSS
-            </a>{' '}
-            and deployed with{' '}
-            <a
-              href="https://vercel.com/"
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Vercel
-            </a>
-            . Grab the source code from{' '}
-            <a className="underline" target="_blank" rel="noopener noreferrer" href="#">
-              Github
-            </a>
-            .
-          </p>
-        </div>
-        <h2 className="mb-4 mt-8 text-2xl font-bold tracking-tight text-black md:text-3xl">
-          Blog Posts
-        </h2>
+    <Container
+      title="CourseFinderHub – Discover the Best Online Courses"
+      description="Curated lists of top-rated online courses from platforms like Udemy, Coursera, and more."
+    >
+      <section className="text-center py-20">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">Find the Best Online Courses</h1>
+        <p className="text-lg text-gray-600 max-w-xl mx-auto mb-6">
+          Curated & reviewed lists to help you choose the right course faster.
+        </p>
+        <Link href="#latest">
+          <a className="inline-block px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
+            Explore Top Picks
+          </a>
+        </Link>
+      </section>
 
-        {!posts.length && <p className="mb-4 text-gray-600">No posts found.</p>}
-
-        {posts.map((post) => {
-          const postImage = post.properties['Cover Image'].files[0]
-          const postImageUrl =
-            postImage?.type === 'file' ? postImage.file.url : postImage?.external.url
-          return (
-            <div key={post.id} className="mb-8 sm:flex">
-              {postImageUrl && (
-                <Link
-                  className="mb-10 block w-full sm:mb-0 sm:mr-5 sm:w-1/3"
-                  href={`/${post.properties.Slug.rich_text[0].plain_text}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img alt="" src={postImageUrl} />
-                </Link>
-              )}
-              <Link className="w-full" href={`/${post.properties.Slug.rich_text[0].plain_text}`}>
-                <div className="w-full">
-                  <h3 className="w-full text-xl font-medium text-gray-900">
-                    {post.properties.Post.title[0].plain_text}
-                  </h3>
-                  <p className="text-gray-700">
-                    {post.properties.Description.rich_text[0].plain_text}
-                  </p>
-                </div>
-              </Link>
-            </div>
-          )
-        })}
-      </div>
+      <section id="latest" className="max-w-4xl mx-auto px-4">
+        <h2 className="text-2xl font-semibold mb-6">Latest Reviews</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {posts.map((post) => (
+            <Link key={post.slug} href={`/${post.slug}`}>
+              <a className="border rounded-xl p-4 hover:shadow-md transition">
+                <h3 className="text-xl font-bold mb-2">
+                  {post.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-2">
+                  {post.description || 'No description available'}
+                </p>
+                <span className="text-xs text-gray-400">
+                  {new Date(post.date).toLocaleDateString()}
+                </span>
+              </a>
+            </Link>
+          ))}
+        </div>
+      </section>
     </Container>
   )
-}
-
-export const getStaticProps = async () => {
-  const database = await getNotionData(process.env.NOTION_DATABASE_ID)
-
-  return {
-    props: {
-      posts: database,
-    },
-  }
 }
