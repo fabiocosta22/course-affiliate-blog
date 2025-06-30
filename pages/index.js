@@ -26,7 +26,7 @@ export default function Home({ posts }) {
         </p>
         <Link href="#latest">
           <a className="inline-block px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">
-            Explore Top Picks
+            Explore Top Picks!
           </a>
         </Link>
       </section>
