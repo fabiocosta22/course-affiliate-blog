@@ -20,13 +20,15 @@
     "lint:fix": "eslint ./ --fix"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.4",
+    "@notionhq/client": "^2.3.0",
     "next": "^13.3.0",
+    "notion-client": "^7.4.2",
     "notion-utils": "^7.4.2",
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-notion-x": "^7.4.2"
+    "react-notion-x": "^7.4.2",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
