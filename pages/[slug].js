@@ -1,74 +1,92 @@
-import BlogLayout from '../layouts/BlogLayout'
-import { getNotionData, getPage, getBlocks } from '../lib/getNotionData'
-import { RenderBlocks } from '../components/ContentBlocks'
+// pages/[slug].js
+import Container from '../components/Container'
+import { getAllPosts, getPostBySlug } from '../lib/notion'
+import { NotionRenderer } from 'react-notion-x'
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
 
-const databaseId = process.env.NOTION_DATABASE_ID
+const Code = dynamic(() => import('react-notion-x/build/third-party/code'))
 
-export default function Post({ page, blocks }) {
-  if (!page || !blocks) {
-    return <div />
-  }
-
-  return (
-    <BlogLayout data={page} content={blocks}>
-      <span className="text-sm text-gray-700">
-        {new Date(page.created_time).toLocaleString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-        })}
-      </span>
-
-      <h1 className="mb-5 text-3xl font-bold tracking-tight text-black md:text-5xl">
-        {page.properties.Post.title[0].plain_text}
-      </h1>
-
-      <RenderBlocks blocks={blocks} />
-    </BlogLayout>
-  )
-}
-
-export const getStaticPaths = async () => {
-  const database = await getNotionData(databaseId)
+export async function getStaticPaths() {
+  const posts = await getAllPosts()
   return {
-    paths: database.map((page) => ({
-      params: {
-        slug: page.properties.Slug.rich_text[0].plain_text,
-      },
-    })),
-    fallback: false,
+    paths: posts.map((post) => ({ params: { slug: post.slug } })),
+    fallback: true,
   }
 }
 
-export const getStaticProps = async (context) => {
-  const { slug } = context.params
-  const database = await getNotionData(databaseId)
-  const filter = database.filter((blog) => blog.properties.Slug.rich_text[0].plain_text === slug)
-  const page = await getPage(filter[0].id)
-  const blocks = await getBlocks(filter[0].id)
-
-  const childrenBlocks = await Promise.all(
-    blocks
-      .filter((block) => block.has_children)
-      .map(async (block) => {
-        return {
-          id: block.id,
-          children: await getBlocks(block.id),
-        }
-      })
-  )
-
-  const blocksWithChildren = blocks.map((block) => {
-    if (block.has_children) {
-      block[block.type].children = childrenBlocks.find((x) => x.id === block.id).children
-    }
-    return block
-  })
+export async function getStaticProps({ params }) {
+  const { recordMap, pageData } = await getPostBySlug(params.slug)
 
   return {
     props: {
-      page,
-      blocks: blocksWithChildren,
+      recordMap,
+      pageData,
     },
+    revalidate: 60,
   }
+}
+
+export default function Post({ recordMap, pageData }) {
+  if (!recordMap || !pageData) return <p className="text-center mt-20">Loading...</p>
+
+  const title = pageData.properties.Post.title[0].plain_text
+  const description = pageData.properties.Description.rich_text[0]?.plain_text || ''
+  const image = pageData.properties['Cover Image'].files[0]
+  const imageUrl = image?.type === 'file' ? image.file.url : image?.external.url
+  const ctaLink = pageData.properties?.URL?.url || '#'
+
+  return (
+    <Container title={title} description={description} image={imageUrl}>
+      <article className="mx-auto max-w-3xl px-4 py-12">
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
+
+        {imageUrl && (
+          <div className="mb-6">
+            <Image
+              src={imageUrl}
+              alt={title}
+              width={800}
+              height={400}
+              className="rounded-xl object-cover"
+            />
+          </div>
+        )}
+
+        <p className="text-gray-600 mb-6">{description}</p>
+
+        {ctaLink !== '#' && (
+          <a
+            href={ctaLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mb-8 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            👉 Enroll in this Course
+          </a>
+        )}
+
+        <div className="prose prose-lg max-w-none">
+          <NotionRenderer
+            recordMap={recordMap}
+            components={{ Code }}
+            darkMode={false}
+          />
+        </div>
+
+        {ctaLink !== '#' && (
+          <div className="mt-10 text-center">
+            <a
+              href={ctaLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-3 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700"
+            >
+              🚀 Start Learning Now
+            </a>
+          </div>
+        )}
+      </article>
+    </Container>
+  )
 }
