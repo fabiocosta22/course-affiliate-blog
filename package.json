@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",
+    "@tailwindcss/typography": "^0.5.16",
     "next": "^13.3.0",
     "notion-client": "^7.4.2",
     "notion-utils": "^7.4.2",
