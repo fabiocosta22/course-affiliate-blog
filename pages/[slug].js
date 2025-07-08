@@ -1,102 +1,53 @@
 // pages/[slug].js
-import Container from '../components/Container'
-import { getAllPosts, getPostBySlug } from '../lib/notion'
-import { NotionRenderer } from 'react-notion-x'
-import dynamic from 'next/dynamic'
-import Image from 'next/image'
+import BlogLayout from '../layouts/BlogLayout'
+import { getNotionData, getPage, getBlocks } from '../lib/getNotionData'
+import { RenderBlocks } from '../components/ContentBlocks'
 
-const Code = dynamic(() => import('react-notion-x/build/third-party/code'))
+const databaseId = process.env.NOTION_DATABASE_ID
 
-export async function getStaticPaths() {
-  const posts = await getAllPosts()
-  return {
-    paths: posts.map((post) => ({ params: { slug: post.slug } })),
-    fallback: true,
+export default function Post({ page, blocks }) {
+  if (!page || !blocks) {
+    return <p className="text-center mt-20">Loading...</p>
   }
-}
 
-export async function getStaticProps({ params }) {
-  const { recordMap, pageData } = await getPostBySlug(params.slug)
-
-  return {
-    props: {
-      recordMap,
-      pageData,
-    },
-    revalidate: 60,
-  }
-}
-
-export default function Post({ recordMap, pageData }) {
-  if (!recordMap || !pageData) return <p className="text-center mt-20">Loading...</p>
-
-  const title = pageData.properties.Post.title[0].plain_text
-  const description = pageData.properties.Description.rich_text[0]?.plain_text || ''
-  const image = pageData.properties['Cover Image']?.files?.[0]
-  const imageUrl = image?.type === 'file' ? image.file.url : image?.external.url
-  const ctaLink = pageData.properties?.URL?.url || '#'
+  const title = page.properties.Post.title[0].plain_text
+  const description = page.properties.Description?.rich_text[0]?.plain_text || ''
+  const image = page.properties['Cover Image']?.files?.[0]
+  const imageUrl = image?.type === 'file' ? image.file.url : image?.external?.url
+  const ctaLink = page.properties?.URL?.url || '#'
 
   return (
-    <Container title={title} description={description} image={imageUrl}>
+    <BlogLayout data={page} content={blocks}>
       <article className="mx-auto max-w-3xl px-4 py-12">
-        {/* Header */}
-        <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3">{title}</h1>
-          <p className="text-gray-600 text-sm">
-            {new Date().toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </p>
-        </header>
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
 
-        {/* Cover Image */}
         {imageUrl && (
-          <div className="mb-8">
-            <Image
+          <div className="mb-6">
+            <img
               src={imageUrl}
               alt={title}
-              width={800}
-              height={400}
               className="rounded-xl object-cover w-full h-auto"
             />
           </div>
         )}
 
-        {/* Description */}
-        {description && (
-          <p className="text-lg text-gray-700 mb-6 text-center max-w-2xl mx-auto">
-            {description}
-          </p>
+        <p className="text-gray-600 mb-6">{description}</p>
+
+        {ctaLink !== '#' && (
+          <a
+            href={ctaLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mb-8 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            👉 Enroll in this Course
+          </a>
         )}
 
-        {/* CTA Button Top */}
-        {ctaLink !== '#' && (
-          <div className="text-center my-8">
-            <a
-              href={ctaLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700"
-            >
-              👉 Enroll in this Course
-            </a>
-          </div>
-        )}
+        <RenderBlocks blocks={blocks} />
 
-        {/* Notion Content */}
-        <div className="prose prose-lg max-w-none dark:prose-invert">
-          <NotionRenderer
-            recordMap={recordMap}
-            components={{ Code }}
-            darkMode={false}
-          />
-        </div>
-
-        {/* CTA Bottom */}
         {ctaLink !== '#' && (
-          <div className="mt-12 text-center">
+          <div className="mt-10 text-center">
             <a
               href={ctaLink}
               target="_blank"
@@ -107,12 +58,55 @@ export default function Post({ recordMap, pageData }) {
             </a>
           </div>
         )}
-
-        {/* Share/Outro */}
-        <footer className="mt-16 text-center text-gray-500 text-sm">
-          Found this useful? Share it with a friend! 💡
-        </footer>
       </article>
-    </Container>
+    </BlogLayout>
   )
+}
+
+export const getStaticPaths = async () => {
+  const database = await getNotionData(databaseId)
+  return {
+    paths: database.map((page) => ({
+      params: {
+        slug: page.properties.Slug.rich_text[0].plain_text,
+      },
+    })),
+    fallback: false,
+  }
+}
+
+export const getStaticProps = async (context) => {
+  const { slug } = context.params
+  const database = await getNotionData(databaseId)
+  const matched = database.find((page) => page.properties.Slug.rich_text[0].plain_text === slug)
+
+  if (!matched) {
+    return { notFound: true }
+  }
+
+  const page = await getPage(matched.id)
+  const blocks = await getBlocks(matched.id)
+
+  const childrenBlocks = await Promise.all(
+    blocks
+      .filter((block) => block.has_children)
+      .map(async (block) => ({
+        id: block.id,
+        children: await getBlocks(block.id),
+      }))
+  )
+
+  const blocksWithChildren = blocks.map((block) => {
+    if (block.has_children) {
+      block[block.type].children = childrenBlocks.find((x) => x.id === block.id)?.children || []
+    }
+    return block
+  })
+
+  return {
+    props: {
+      page,
+      blocks: blocksWithChildren,
+    },
+  }
 }
