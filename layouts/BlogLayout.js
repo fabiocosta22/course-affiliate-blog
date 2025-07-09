@@ -1,14 +1,21 @@
 import Container from '../components/Container'
 
 export default function BlogLayout({ children, data }) {
-  const postImage = data.properties['Cover Image'].files[0]
-  const postImageUrl = postImage?.type === 'file' ? postImage.file.url : postImage?.external.url
+  const title = data.properties?.Post?.title?.[0]?.plain_text || 'Untitled'
+  const description = data.properties?.Description?.rich_text?.[0]?.plain_text || ''
+  const date = data.properties?.Date?.date?.start
+    ? new Date(data.properties.Date.date.start)
+    : null
+
+  const postImage = data.properties?.CoverImage?.files?.[0]
+  const postImageUrl =
+    postImage?.type === 'file' ? postImage.file.url : postImage?.external?.url
 
   return (
     <Container
-      title={data.properties.Post.title[0].plain_text}
-      description={data.properties.Description.rich_text[0].plain_text}
-      date={new Date(data.properties.Date.date.start)}
+      title={title}
+      description={description}
+      date={date}
       type="article"
       image={postImageUrl}
     >

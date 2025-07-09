@@ -12,7 +12,7 @@ export default function Post({ page, blocks }) {
 
   const title = page.properties.Post.title[0].plain_text
   const description = page.properties.Description?.rich_text[0]?.plain_text || ''
-  const image = page.properties['Cover Image']?.files?.[0]
+  const image = page.properties['CoverImage']?.files?.[0]
   const imageUrl = image?.type === 'file' ? image.file.url : image?.external?.url
   const ctaLink = page.properties?.URL?.url || '#'
 
