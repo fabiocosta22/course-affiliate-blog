@@ -21,56 +21,70 @@ export default function Post({ page, blocks, relatedPosts }) {
 
   return (
     <BlogLayout data={page} content={blocks}>
-      <article className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="mb-4 text-4xl font-bold">{title}</h1>
-
+      <article className="mx-auto max-w-4xl px-4 py-16">
+        {/* Hero Image */}
         {imageUrl && (
-          <div className="mb-6">
+          <div className="relative mb-12 overflow-hidden rounded-2xl shadow-lg">
             <img
               src={imageUrl}
               alt={title}
-              className="h-auto w-full rounded-xl object-cover"
+              className="h-80 w-full object-cover sm:h-96"
             />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <h1 className="absolute bottom-6 left-6 text-4xl font-extrabold text-white drop-shadow-lg">
+              {title}
+            </h1>
           </div>
         )}
 
-        <p className="mb-6 text-gray-600">{description}</p>
+        {/* Description */}
+        <p className="mb-6 text-lg text-gray-600">{description}</p>
 
+        {/* CTA */}
         {ctaLink !== "#" && (
-          <a
-            href={ctaLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mb-8 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
-          >
-            👉 Enroll in this Course
-          </a>
-        )}
-
-        <RenderBlocks blocks={blocks} />
-
-        {ctaLink !== "#" && (
-          <div className="mt-10 text-center">
+          <div className="mb-12 text-center">
             <a
               href={ctaLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-lg bg-green-600 px-6 py-3 text-lg text-white hover:bg-green-700"
+              className="inline-block rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-8 py-3 text-lg font-medium text-white shadow-md transition hover:scale-105 hover:shadow-lg"
+            >
+              👉 Enroll in this Course
+            </a>
+          </div>
+        )}
+
+        {/* Notion Content */}
+        <RenderBlocks blocks={blocks} />
+
+        {/* Second CTA */}
+        {ctaLink !== "#" && (
+          <div className="mt-16 text-center">
+            <a
+              href={ctaLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-full bg-green-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-green-700"
             >
               🚀 Start Learning Now
             </a>
           </div>
         )}
 
+        {/* Related Posts */}
         {relatedPosts?.length > 0 && (
-          <div className="mt-16 border-t pt-8">
-            <h3 className="mb-4 text-2xl font-semibold">Related Posts</h3>
-            <ul className="grid gap-2">
+          <div className="mt-20 border-t pt-10">
+            <h3 className="mb-6 text-2xl font-semibold text-gray-800">
+              Related Posts
+            </h3>
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {relatedPosts.map((post) => (
                 <li key={post.id}>
                   <Link href={`/${post.slug}`}>
-                    <a className="text-blue-600 hover:underline">
-                      {post.title}
+                    <a className="block rounded-xl border p-4 shadow-sm transition hover:border-blue-500 hover:shadow-md">
+                      <h4 className="text-lg font-medium text-blue-600">
+                        {post.title}
+                      </h4>
                     </a>
                   </Link>
                 </li>
