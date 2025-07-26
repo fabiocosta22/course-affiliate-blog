@@ -5,7 +5,7 @@ import { RenderBlocks } from '../components/ContentBlocks'
 
 const databaseId = process.env.NOTION_DATABASE_ID
 
-export default function Post({ page, blocks }) {
+export default function Post({ page, blocks, relatedPosts }) {
   if (!page || !blocks) {
     return <p className="text-center mt-20">Loading...</p>
   }
@@ -58,6 +58,21 @@ export default function Post({ page, blocks }) {
             </a>
           </div>
         )}
+
+        {relatedPosts?.length > 0 && (
+          <div className="mt-16 border-t pt-8">
+            <h3 className="text-2xl font-semibold mb-4">Related Posts</h3>
+            <ul className="grid gap-2">
+              {relatedPosts.map((post) => (
+                <li key={post.id}>
+                  <Link href={`/${post.slug}`}>
+                    <a className="text-blue-600 hover:underline">{post.title}</a>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </article>
     </BlogLayout>
   )
@@ -87,6 +102,24 @@ export const getStaticProps = async (context) => {
   const page = await getPage(matched.id)
   const blocks = await getBlocks(matched.id)
 
+  // NEW: fetch related post details
+  const relatedRelations = page.properties?.['Related Posts']?.relation || []
+  let relatedPosts = []
+
+  if (relatedRelations.length > 0) {
+    const fetched = await Promise.all(
+      relatedRelations.map(async (rel) => {
+        const relPage = await getPage(rel.id)
+        return {
+          id: relPage.id,
+          title: relPage.properties.Post?.title?.[0]?.plain_text || 'Untitled',
+          slug: relPage.properties.Slug?.rich_text?.[0]?.plain_text || '',
+        }
+      })
+    )
+    relatedPosts = fetched
+  }
+
   const childrenBlocks = await Promise.all(
     blocks
       .filter((block) => block.has_children)
@@ -107,6 +140,8 @@ export const getStaticProps = async (context) => {
     props: {
       page,
       blocks: blocksWithChildren,
+      relatedPosts, // pass as prop
     },
   }
 }
+
