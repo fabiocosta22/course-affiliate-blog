@@ -51,6 +51,20 @@ export default function Home({ posts }) {
                     <h3 className="text-lg font-semibold mb-1 group-hover:text-blue-600 transition">
                       {post.title}
                     </h3>
+
+                    {/* Category Tags */}
+                    {post.categories?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {post.categories.map((category) => (
+                          <Link key={category} href={`/categories/${encodeURIComponent(category)}`}>
+                            <a className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded hover:bg-blue-200 transition">
+                              {category}
+                            </a>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
                     <p className="text-sm text-gray-600 line-clamp-3 mb-3">
                       {post.description || 'No description available'}
                     </p>
