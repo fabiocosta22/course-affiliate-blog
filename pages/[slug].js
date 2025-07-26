@@ -2,6 +2,7 @@
 import BlogLayout from '../layouts/BlogLayout'
 import { getNotionData, getPage, getBlocks } from '../lib/getNotionData'
 import { RenderBlocks } from '../components/ContentBlocks'
+import Link from 'next/link'
 
 const databaseId = process.env.NOTION_DATABASE_ID
 
