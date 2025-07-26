@@ -103,7 +103,7 @@ export const getStaticProps = async (context) => {
   const blocks = await getBlocks(matched.id)
 
   // NEW: fetch related post details
-  const relatedRelations = page.properties?.['Related Posts']?.relation || []
+  const relatedRelations = page.properties?.['RelatedPosts']?.relation || []
   let relatedPosts = []
 
   if (relatedRelations.length > 0) {
