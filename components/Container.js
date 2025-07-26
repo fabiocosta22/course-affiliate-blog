@@ -2,8 +2,9 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Nav from './Nav'
 import Footer from './Footer'
+import CookieConsent from 'react-cookie-consent'
 
-const baseUrl = 'https://www.coursefinderhub.com' // or your own domain
+const baseUrl = 'https://www.coursefinderhub.com'
 
 export default function Container(props) {
   const { children, ...customMeta } = props
@@ -37,11 +38,40 @@ export default function Container(props) {
         {meta.date && <meta property="article:published_time" content={meta.date} />}
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <Nav />
+
       <main id="skip" className="px-4">
         {children}
         <Footer />
       </main>
+
+      {/* ✅ Cookie Consent Banner */}
+      <CookieConsent
+        location="bottom"
+        buttonText="Accept"
+        cookieName="coursefinderhub_cookie_consent"
+        style={{
+          background: "#1F2937", // Tailwind gray-800
+          color: "#F9FAFB",       // Tailwind gray-50
+          fontSize: "14px",
+          zIndex: 9999,
+        }}
+        buttonStyle={{
+          background: "#2563EB",  // Tailwind blue-600
+          color: "#ffffff",
+          borderRadius: "6px",
+          padding: "10px 16px",
+          fontSize: "14px",
+        }}
+        expires={150}
+      >
+        We use cookies to enhance your experience and analyze site traffic.{' '}
+        <a href="/legal/privacy" className="underline text-white hover:text-blue-300">
+          Learn more
+        </a>
+        .
+      </CookieConsent>
     </>
   )
 }
