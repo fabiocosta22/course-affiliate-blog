@@ -1,21 +1,21 @@
-import { useRouter } from 'next/router'
-import Head from 'next/head'
-import Nav from './Nav'
-import Footer from './Footer'
-import CookieConsent from 'react-cookie-consent'
+import { useRouter } from "next/router";
+import Head from "next/head";
+import Nav from "./Nav";
+import Footer from "./Footer";
+import CookieConsent from "react-cookie-consent";
 
-const baseUrl = 'https://www.coursefinderhub.com'
+const baseUrl = "https://www.coursefinderhub.com";
 
 export default function Container(props) {
-  const { children, ...customMeta } = props
-  const router = useRouter()
+  const { children, ...customMeta } = props;
+  const router = useRouter();
   const meta = {
-    title: 'CourseFinderHub – Curated Course Reviews',
+    title: "CourseFinderHub – Curated Course Reviews",
     description: `Honest, AI-powered reviews of top online courses to help you learn faster and better.`,
-    type: 'website',
-    image: '/site.png',
+    type: "website",
+    image: "/site.png",
     ...customMeta,
-  }
+  };
 
   return (
     <>
@@ -35,7 +35,9 @@ export default function Container(props) {
         <meta name="twitter:title" content={meta.title} />
         <meta name="twitter:description" content={meta.description} />
         <meta name="twitter:image" content={meta.image} />
-        {meta.date && <meta property="article:published_time" content={meta.date} />}
+        {meta.date && (
+          <meta property="article:published_time" content={meta.date} />
+        )}
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -53,12 +55,12 @@ export default function Container(props) {
         cookieName="coursefinderhub_cookie_consent"
         style={{
           background: "#1F2937", // Tailwind gray-800
-          color: "#F9FAFB",       // Tailwind gray-50
+          color: "#F9FAFB", // Tailwind gray-50
           fontSize: "14px",
           zIndex: 9999,
         }}
         buttonStyle={{
-          background: "#2563EB",  // Tailwind blue-600
+          background: "#2563EB", // Tailwind blue-600
           color: "#ffffff",
           borderRadius: "6px",
           padding: "10px 16px",
@@ -66,12 +68,15 @@ export default function Container(props) {
         }}
         expires={150}
       >
-        We use cookies to enhance your experience and analyze site traffic.{' '}
-        <a href="/legal/privacy" className="underline text-white hover:text-blue-300">
+        We use cookies to enhance your experience and analyze site traffic.{" "}
+        <a
+          href="/legal/privacy"
+          className="text-white underline hover:text-blue-300"
+        >
           Learn more
         </a>
         .
       </CookieConsent>
     </>
-  )
+  );
 }

@@ -1,45 +1,47 @@
 // pages/[slug].js
-import BlogLayout from '../layouts/BlogLayout'
-import { getNotionData, getPage, getBlocks } from '../lib/getNotionData'
-import { RenderBlocks } from '../components/ContentBlocks'
-import Link from 'next/link'
+import BlogLayout from "../layouts/BlogLayout";
+import { getNotionData, getPage, getBlocks } from "../lib/getNotionData";
+import { RenderBlocks } from "../components/ContentBlocks";
+import Link from "next/link";
 
-const databaseId = process.env.NOTION_DATABASE_ID
+const databaseId = process.env.NOTION_DATABASE_ID;
 
 export default function Post({ page, blocks, relatedPosts }) {
   if (!page || !blocks) {
-    return <p className="text-center mt-20">Loading...</p>
+    return <p className="mt-20 text-center">Loading...</p>;
   }
 
-  const title = page.properties.Post.title[0].plain_text
-  const description = page.properties.Description?.rich_text[0]?.plain_text || ''
-  const image = page.properties['CoverImage']?.files?.[0]
-  const imageUrl = image?.type === 'file' ? image.file.url : image?.external?.url
-  const ctaLink = page.properties?.URL?.url || '#'
+  const title = page.properties.Post.title[0].plain_text;
+  const description =
+    page.properties.Description?.rich_text[0]?.plain_text || "";
+  const image = page.properties["CoverImage"]?.files?.[0];
+  const imageUrl =
+    image?.type === "file" ? image.file.url : image?.external?.url;
+  const ctaLink = page.properties?.URL?.url || "#";
 
   return (
     <BlogLayout data={page} content={blocks}>
       <article className="mx-auto max-w-3xl px-4 py-12">
-        <h1 className="text-4xl font-bold mb-4">{title}</h1>
+        <h1 className="mb-4 text-4xl font-bold">{title}</h1>
 
         {imageUrl && (
           <div className="mb-6">
             <img
               src={imageUrl}
               alt={title}
-              className="rounded-xl object-cover w-full h-auto"
+              className="h-auto w-full rounded-xl object-cover"
             />
           </div>
         )}
 
-        <p className="text-gray-600 mb-6">{description}</p>
+        <p className="mb-6 text-gray-600">{description}</p>
 
-        {ctaLink !== '#' && (
+        {ctaLink !== "#" && (
           <a
             href={ctaLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block mb-8 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mb-8 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
           >
             👉 Enroll in this Course
           </a>
@@ -47,13 +49,13 @@ export default function Post({ page, blocks, relatedPosts }) {
 
         <RenderBlocks blocks={blocks} />
 
-        {ctaLink !== '#' && (
+        {ctaLink !== "#" && (
           <div className="mt-10 text-center">
             <a
               href={ctaLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700"
+              className="inline-block rounded-lg bg-green-600 px-6 py-3 text-lg text-white hover:bg-green-700"
             >
               🚀 Start Learning Now
             </a>
@@ -62,12 +64,14 @@ export default function Post({ page, blocks, relatedPosts }) {
 
         {relatedPosts?.length > 0 && (
           <div className="mt-16 border-t pt-8">
-            <h3 className="text-2xl font-semibold mb-4">Related Posts</h3>
+            <h3 className="mb-4 text-2xl font-semibold">Related Posts</h3>
             <ul className="grid gap-2">
               {relatedPosts.map((post) => (
                 <li key={post.id}>
                   <Link href={`/${post.slug}`}>
-                    <a className="text-blue-600 hover:underline">{post.title}</a>
+                    <a className="text-blue-600 hover:underline">
+                      {post.title}
+                    </a>
                   </Link>
                 </li>
               ))}
@@ -76,49 +80,51 @@ export default function Post({ page, blocks, relatedPosts }) {
         )}
       </article>
     </BlogLayout>
-  )
+  );
 }
 
 export const getStaticPaths = async () => {
-  const database = await getNotionData(databaseId)
+  const database = await getNotionData(databaseId);
   return {
     paths: database.map((page) => ({
       params: {
         slug: page.properties.Slug.rich_text[0].plain_text,
       },
     })),
-    fallback: 'blocking',
-  }
-}
+    fallback: "blocking",
+  };
+};
 
 export const getStaticProps = async (context) => {
-  const { slug } = context.params
-  const database = await getNotionData(databaseId)
-  const matched = database.find((page) => page.properties.Slug.rich_text[0].plain_text === slug)
+  const { slug } = context.params;
+  const database = await getNotionData(databaseId);
+  const matched = database.find(
+    (page) => page.properties.Slug.rich_text[0].plain_text === slug,
+  );
 
   if (!matched) {
-    return { notFound: true }
+    return { notFound: true };
   }
 
-  const page = await getPage(matched.id)
-  const blocks = await getBlocks(matched.id)
+  const page = await getPage(matched.id);
+  const blocks = await getBlocks(matched.id);
 
   // NEW: fetch related post details
-  const relatedRelations = page.properties?.['RelatedPosts']?.relation || []
-  let relatedPosts = []
+  const relatedRelations = page.properties?.["RelatedPosts"]?.relation || [];
+  let relatedPosts = [];
 
   if (relatedRelations.length > 0) {
     const fetched = await Promise.all(
       relatedRelations.map(async (rel) => {
-        const relPage = await getPage(rel.id)
+        const relPage = await getPage(rel.id);
         return {
           id: relPage.id,
-          title: relPage.properties.Post?.title?.[0]?.plain_text || 'Untitled',
-          slug: relPage.properties.Slug?.rich_text?.[0]?.plain_text || '',
-        }
-      })
-    )
-    relatedPosts = fetched
+          title: relPage.properties.Post?.title?.[0]?.plain_text || "Untitled",
+          slug: relPage.properties.Slug?.rich_text?.[0]?.plain_text || "",
+        };
+      }),
+    );
+    relatedPosts = fetched;
   }
 
   const childrenBlocks = await Promise.all(
@@ -127,15 +133,16 @@ export const getStaticProps = async (context) => {
       .map(async (block) => ({
         id: block.id,
         children: await getBlocks(block.id),
-      }))
-  )
+      })),
+  );
 
   const blocksWithChildren = blocks.map((block) => {
     if (block.has_children) {
-      block[block.type].children = childrenBlocks.find((x) => x.id === block.id)?.children || []
+      block[block.type].children =
+        childrenBlocks.find((x) => x.id === block.id)?.children || [];
     }
-    return block
-  })
+    return block;
+  });
 
   return {
     props: {
@@ -143,6 +150,5 @@ export const getStaticProps = async (context) => {
       blocks: blocksWithChildren,
       relatedPosts, // pass as prop
     },
-  }
-}
-
+  };
+};
