@@ -23,10 +23,13 @@ export default function Footer() {
           </Link>
         </div>
         <div className="flex flex-col items-center space-y-2">
-          
+          <Link href="/legal/privacy" className="text-gray-500 transition hover:text-gray-600">Privacy Policy</Link>
         </div>
         <div className="flex flex-col items-center space-y-2">
-
+          <Link href="/legal/terms" className="text-gray-500 transition hover:text-gray-600">Terms of Service</Link>
+        </div>
+        <div className="flex flex-col items-center space-y-2">
+          <Link href="/legal/affiliate" className="text-gray-500 transition hover:text-gray-600">Affiliate Disclaimer</Link>
         </div>
       </div>
 
