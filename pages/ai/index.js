@@ -7,6 +7,17 @@ export default function AiLeadMagnet() {
       <Head>
         <title>10 AI Automations That Save SMBs 10+ Hours/Week</title>
         <meta
+          property="og:image"
+          content="https://www.coursefinderhub.com/og-ai-guide.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content="10 AI Automations That Save Small Businesses 10+ Hours a Week"
+        />
+
+        <meta
           name="description"
           content="Free guide: 10 simple AI automations that help small businesses save time, cut costs, and work smarter."
         />
