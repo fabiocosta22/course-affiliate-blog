@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 const ExternalLink = ({ href, children }) => (
   <a
@@ -9,7 +9,7 @@ const ExternalLink = ({ href, children }) => (
   >
     {children}
   </a>
-)
+);
 
 export default function Nav() {
   return (
@@ -19,10 +19,12 @@ export default function Nav() {
       </a>
 
       <div>
-        <Link href="/" className="p-1 text-gray-900 hover:underline sm:p-4">
+        <Link href="/ai" className="p-1 text-gray-900 hover:underline sm:p-4">
           Home
         </Link>
+        <Link href="/ai">Free AI Guide</Link>
+        <Link href="/">Courses Blog</Link>
       </div>
     </nav>
-  )
+  );
 }
