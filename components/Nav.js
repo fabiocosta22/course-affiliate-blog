@@ -22,8 +22,12 @@ export default function Nav() {
         <Link href="/ai" className="p-1 text-gray-900 hover:underline sm:p-4">
           Home
         </Link>
-        <Link href="/ai">Free AI Guide</Link>
-        <Link href="/">Courses Blog</Link>
+        <Link href="/ai" className="p-1 text-gray-900 hover:underline sm:p-4">
+          Free AI Guide
+        </Link>
+        <Link href="/" className="p-1 text-gray-900 hover:underline sm:p-4">
+          Courses Blog
+        </Link>
       </div>
     </nav>
   );
